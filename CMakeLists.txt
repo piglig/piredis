@@ -7,8 +7,8 @@ link_directories(
     /usr/local/lib
 )
 
-include_directories("/usr/local/include/hiredis-vip")
+include_directories("/usr/local/include/hiredis")
 
 add_executable(test test.cpp)
 
-target_link_libraries(test -lhiredis_vip)
+target_link_libraries(test -lhiredis)

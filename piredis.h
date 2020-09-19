@@ -36,8 +36,11 @@ public:
 
         std::string res{reply->str};
         freeReplyObject(reply);
-        
         return res;
+    }
+
+    void freeRedis() {
+        redisFree(piRedisContext);
     }
 
 private:

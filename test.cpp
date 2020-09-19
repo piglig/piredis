@@ -9,7 +9,7 @@ int main(void)
     struct timeval tv;
     tv.tv_sec = 0;
     tv.tv_usec = 100000;
-    redisContext *c = redisConnectWithTimeout("10.10.243.226", 6379, tv);
+    redisContext *c = redisConnectWithTimeout("127.0.0.1", 6379, tv);
     if (c == NULL || c->err) {
     if (c) {
         printf("Error: %s\n", c->errstr);
