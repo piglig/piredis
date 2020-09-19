@@ -39,6 +39,18 @@ stdint.h
 /usr/local/piredis/test.cpp
 iostream
 -
+vector
+-
+algorithm
+-
 hiredis.h
+-
+utils/utils.h
+/usr/local/piredis/utils/utils.h
+
+/usr/local/piredis/utils/utils.h
+vector
+-
+string
 -
 

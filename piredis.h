@@ -39,6 +39,8 @@ public:
         return res;
     }
 
+    
+
     void freeRedis() {
         redisFree(piRedisContext);
     }

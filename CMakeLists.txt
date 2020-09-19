@@ -1,6 +1,6 @@
 cmake_minimum_required (VERSION 2.6)
 # specify the C++ standard
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 link_directories(

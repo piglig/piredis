@@ -6,4 +6,5 @@ CMakeFiles/test.dir/test.cpp.o: /usr/local/include/hiredis/hiredis.h
 CMakeFiles/test.dir/test.cpp.o: /usr/local/include/hiredis/read.h
 CMakeFiles/test.dir/test.cpp.o: /usr/local/include/hiredis/sds.h
 CMakeFiles/test.dir/test.cpp.o: test.cpp
+CMakeFiles/test.dir/test.cpp.o: utils/utils.h
 
