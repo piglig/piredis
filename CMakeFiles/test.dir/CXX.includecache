@@ -36,6 +36,10 @@ stdarg.h
 stdint.h
 -
 
+/usr/local/piredis/node.h
+vector
+-
+
 /usr/local/piredis/test.cpp
 iostream
 -
@@ -47,6 +51,18 @@ hiredis.h
 -
 utils/utils.h
 /usr/local/piredis/utils/utils.h
+utils/redis_utils.h
+/usr/local/piredis/utils/redis_utils.h
+node.h
+/usr/local/piredis/node.h
+
+/usr/local/piredis/utils/redis_utils.h
+vector
+-
+utils.h
+/usr/local/piredis/utils/utils.h
+../node.h
+/usr/local/piredis/node.h
 
 /usr/local/piredis/utils/utils.h
 vector

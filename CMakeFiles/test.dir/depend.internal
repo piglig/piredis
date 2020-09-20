@@ -6,5 +6,7 @@ CMakeFiles/test.dir/test.cpp.o
  /usr/local/include/hiredis/hiredis.h
  /usr/local/include/hiredis/read.h
  /usr/local/include/hiredis/sds.h
+ /usr/local/piredis/node.h
  /usr/local/piredis/test.cpp
+ /usr/local/piredis/utils/redis_utils.h
  /usr/local/piredis/utils/utils.h
