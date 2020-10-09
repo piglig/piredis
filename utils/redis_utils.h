@@ -61,14 +61,22 @@ public:
                 break;
             default:
                 std::vector<std::string> slots = MyUtils::SplitString(nodeInfo[i], "-");
-                std::cout << slots.size() << std::endl;
                 res.m_iSlotBegin = atoi(slots[0].c_str());
                 res.m_iSlotEnd = atoi(slots[1].c_str());
                 break;
             }
         }
-
         return res;
+    }
+
+    static PiRedisNodeStruct* getRightClusterNode(const std::string& key, std::vector<PiRedisNodeStruct> clusterNodes) {
+        int slot = MyUtils::GetSlotValue(key);
+        for (int i = 0; i < clusterNodes.size(); ++i) {
+            if (slot >= clusterNodes[i].m_iSlotBegin && slot <= clusterNodes[i].m_iSlotEnd) {
+                return &clusterNodes[i];
+            }
+        }
+        return nullptr;
     }
 };
 

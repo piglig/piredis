@@ -4,7 +4,6 @@
 #include <hiredis.h>
 #include <cstdint>
 #include <iomanip>
-#include "CRC.h"
 #include "utils/utils.h"
 #include "utils/redis_utils.h"
 
@@ -44,7 +43,7 @@ int main(void)
         return -1;
     }
     // abce \n dueiosdfj \n
-    std::vector < PiRedisNode> piRedisNodes;
+    std::vector < PiRedisNodeStruct> piRedisNodes;
     if (reply->type == REDIS_REPLY_STRING)
     {
         std::string lrangeReply{reply->str};
@@ -52,26 +51,26 @@ int main(void)
         size_t pos = 0;
         std::vector<std::string> vs;
         vs = MyUtils::SplitString(lrangeReply, delimiter);
-        std::cout << vs.size() << std::endl;
-        for_each(vs.begin(), vs.end(), [](const auto& str) {
+        
+        for_each(vs.begin(), vs.end(), [&](const auto& str) {
             PiRedisNodeStruct temp;
             temp = RedisUtils::nodeStringSplit(str);
-            cout << "port:" << temp.m_iPort << endl;
-            cout << "cport:" << temp.m_iCport << endl;
-            cout << "slotBegin:" << temp.m_iSlotBegin << endl;
-            cout << "slotEnd:" << temp.m_iSlotEnd << endl;
-            cout << "-----------------" << endl;
+            // PiRedisNode piRedisNode;
+
+            // cout << "port:" << temp.m_iPort << endl;
+            // cout << "cport:" << temp.m_iCport << endl;
+            // cout << "slotBegin:" << temp.m_iSlotBegin << endl;
+            // cout << "slotEnd:" << temp.m_iSlotEnd << endl;
+            // cout << "-----------------" << endl;
+            piRedisNodes.push_back(temp);
         });
-        
+        cout << piRedisNodes.size() << endl;
     }
 
     freeReplyObject(reply);
 
-    // char mystr[] = "foo";
-    // const char myString[] = "foo";
-    
-    
-    // std::cout << MyUtils::CRC16_XMODEM(mystr, 3) % 16384 << std::endl;
+    std::string mystr = "foo";
+    std::cout << MyUtils::GetSlotValue(mystr) << std::endl;
 
     return 0;
 }

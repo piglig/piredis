@@ -36,8 +36,6 @@ stdarg.h
 stdint.h
 -
 
-/usr/local/piredis/CRC.h
-
 /usr/local/piredis/node.h
 vector
 -
@@ -55,8 +53,6 @@ cstdint
 -
 iomanip
 -
-CRC.h
-/usr/local/piredis/CRC.h
 utils/utils.h
 /usr/local/piredis/utils/utils.h
 utils/redis_utils.h

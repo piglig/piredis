@@ -38,9 +38,7 @@ public:
         freeReplyObject(reply);
         return res;
     }
-
     
-
     void freeRedis() {
         redisFree(piRedisContext);
     }

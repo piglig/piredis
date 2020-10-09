@@ -44,34 +44,32 @@ public:
         return (wCRCin);
     }
 
-    static std::string GetRealKey(const std::string& key) {
+    static unsigned short GetSlotValue(const std::string& key) {
         std::string res;
         int begin = 0;
         int end = 0;
-        for (int i = 0; i < key.length(); ++i) {
-            if (key[i] == '{') {
-                begin = i;
+        for (begin = 0; begin < key.length(); ++begin) {
+            if (key[begin] == '{') {
                 break;
             }
         }
 
-        if (begin == 0) {
+        if (begin == key.length()) {
             res = key;
-            return res;
+            return CRC16_XMODEM(&res[0], res.length()) % 16384;
         }
 
-        for (int i = begin + 1; i < key.length(); ++i) {
-            if (key[i] == '}') {
-                end = i;
+        for (end = begin + 1; end < key.length(); ++end) {
+            if (key[end] == '}') {
                 break;
             }
         }
 
-        if (end == 0 || end == key.length() - 1) {
+        if (end == begin + 1 || end == key.length()) {
             res = key;
-            return res;
+            return CRC16_XMODEM(&res[0], key.length()) % 16384;
         }
-
+        return CRC16_XMODEM(&(key.substr(begin + 1, end - begin - 1))[0], end - begin - 1) % 16384;
     }
 };
 
