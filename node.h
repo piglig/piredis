@@ -31,7 +31,8 @@ public:
     uint64_t m_ui64PongRecv;
     std::string m_strConfigEpoch;
     std::string m_strLinkState;
-    std::string m_strSlot;
+    int m_iSlotBegin;
+    int m_iSlotEnd;
 };
 
 class PiRedisNode {
@@ -40,8 +41,8 @@ public:
                 const std::string &master, uint64_t pingSent, uint64_t pongRecv, const std::string &configEpoch,
                 const std::string &linkState, const std::string &slot = "")
         : m_strNodeId(nodeId), m_strIp(ip), m_iCport(cPort), m_strFlags(flags), m_strMaster(master),
-          m_ui64PingSent(pingSent), m_ui64PongRecv(pongRecv), m_strConfigEpoch(configEpoch), m_strLinkState(linkState),
-          m_strSlot(slot)
+        m_ui64PingSent(pingSent), m_ui64PongRecv(pongRecv), m_strConfigEpoch(configEpoch), m_strLinkState(linkState),
+        m_strSlot(slot)
     {
 
     };

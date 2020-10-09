@@ -2,8 +2,12 @@
 #include <vector>
 #include <algorithm>
 #include <hiredis.h>
+#include <cstdint>
+#include <iomanip>
+#include "CRC.h"
 #include "utils/utils.h"
 #include "utils/redis_utils.h"
+
 #include "node.h"
 
 using std::cout;
@@ -16,14 +20,12 @@ int main(void)
     tv.tv_usec = 100000;
     redisContext *c = redisConnectWithTimeout("101.37.20.126", 6379, tv);
     if (c == NULL || c->err) {
-    if (c) {
-        printf("Error: %s\n", c->errstr);
-        // handle error
-    } else {
-        printf("Can't allocate redis context\n");
+        if (c) {
+            printf("Error: %s\n", c->errstr);
+        } else {
+            printf("Can't allocate redis context\n");
+        }
     }
-}
-
 
     redisReply *reply = (redisReply *)redisCommand(c, "PING");
     if (reply == NULL) {
@@ -50,32 +52,26 @@ int main(void)
         size_t pos = 0;
         std::vector<std::string> vs;
         vs = MyUtils::SplitString(lrangeReply, delimiter);
-        
+        std::cout << vs.size() << std::endl;
         for_each(vs.begin(), vs.end(), [](const auto& str) {
             PiRedisNodeStruct temp;
             temp = RedisUtils::nodeStringSplit(str);
-            std::string nodeId;
-            std::string ip;
-            int port;
-            int cPort;
-            std::string flags;
-            std::string master;
-            uint64_t pingSent;
-            uint64_t pongRecv;
-            std::string configEpoch;
-            std::string linkState;
-            std::string slot;
             cout << "port:" << temp.m_iPort << endl;
             cout << "cport:" << temp.m_iCport << endl;
-            cout << "pingSeng:" << temp.m_ui64PingSent << endl;
-            cout << "pongRecv:" << temp.m_ui64PongRecv << endl;
+            cout << "slotBegin:" << temp.m_iSlotBegin << endl;
+            cout << "slotEnd:" << temp.m_iSlotEnd << endl;
             cout << "-----------------" << endl;
         });
         
-        cout << reply->type << endl;
     }
 
     freeReplyObject(reply);
+
+    // char mystr[] = "foo";
+    // const char myString[] = "foo";
+    
+    
+    // std::cout << MyUtils::CRC16_XMODEM(mystr, 3) % 16384 << std::endl;
 
     return 0;
 }

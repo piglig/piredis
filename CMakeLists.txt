@@ -7,7 +7,8 @@ link_directories(
     /usr/local/lib
 )
 
-include_directories("/usr/local/include/hiredis")
+include_directories("/usr/local/include/hiredis"
+)
 
 add_executable(test test.cpp)
 

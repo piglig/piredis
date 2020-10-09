@@ -21,6 +21,7 @@ public:
     static PiRedisNodeStruct nodeStringSplit(std::string nodeStr)
     {
         std::vector<std::string> nodeInfo = MyUtils::SplitString(nodeStr, " ");
+        
         PiRedisNodeStruct res;
         for (int i = 0; i < nodeInfo.size(); ++i)
         {
@@ -59,7 +60,10 @@ public:
             }
                 break;
             default:
-                res.m_strSlot = nodeInfo[i];
+                std::vector<std::string> slots = MyUtils::SplitString(nodeInfo[i], "-");
+                std::cout << slots.size() << std::endl;
+                res.m_iSlotBegin = atoi(slots[0].c_str());
+                res.m_iSlotEnd = atoi(slots[1].c_str());
                 break;
             }
         }
