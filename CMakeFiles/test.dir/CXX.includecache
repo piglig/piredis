@@ -40,6 +40,18 @@ stdint.h
 vector
 -
 
+/usr/local/piredis/piredis.h
+iostream
+-
+string
+-
+hiredis.h
+-
+utils/redis_utils.h
+/usr/local/piredis/utils/redis_utils.h
+node.h
+/usr/local/piredis/node.h
+
 /usr/local/piredis/test.cpp
 iostream
 -
@@ -51,8 +63,8 @@ hiredis.h
 -
 cstdint
 -
-iomanip
--
+piredis.h
+/usr/local/piredis/piredis.h
 utils/utils.h
 /usr/local/piredis/utils/utils.h
 utils/redis_utils.h
