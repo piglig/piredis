@@ -34,7 +34,8 @@ int main(void)
     }
 
     // piRedis.connectPiRedisClusterNode("101.37.20.126", 6380);
-    cout << piRedis.getFromCluster("foo").replyString << endl;
+    // cout << piRedis.getFromCluster("foo1").replyString << endl;
+    cout << piRedis.set("test_set", "100").replyString << endl;
 
     // redisReply *reply = (redisReply *)redisCommand(c, "PING");
     // if (reply == NULL) {
@@ -71,7 +72,7 @@ int main(void)
     // }
     // freeReplyObject(reply);
 
-    std::string mystr = "foo";
+    std::string mystr = "foo1";
     std::cout << MyUtils::GetSlotValue(mystr) << std::endl;
 
     return 0;

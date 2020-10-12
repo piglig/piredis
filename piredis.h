@@ -72,8 +72,8 @@ public:
 
         redisReply *reply = (redisReply *)redisCommand(piRedisContext, command.c_str());
         res.replyString = reply->str;
-        if (reply == nullptr) {
-            cout << "reply is null[" << piRedisContext->errstr << "]" << endl;
+        if (reply == nullptr || reply->type == REDIS_REPLY_ERROR) {
+            cout << "reply is error[" << reply->str << "]" << endl;
             res.errorCode = -1;
             freeReplyObject(reply);
             return res;
@@ -100,6 +100,32 @@ public:
         }
 
         return sendCommandDirectly("get " + key);
+    }
+
+    PiRedisReply get(const std::string& key) {
+        return sendCommandDirectly("get " + key);
+    }
+
+    PiRedisReply set(const std::string& key, const std::string& value) {
+        return sendCommandDirectly("set " + key + " " + value);
+    }
+
+    PiRedisReply setToCluster(const std::string& key, const std::string& value) {
+        PiRedisReply res;
+
+        unsigned short slot = MyUtils::GetSlotValue(key);
+        PiRedisNodeStruct* clusterNode = RedisUtils::getRightClusterNode(key, m_vPiRedisNodes);
+        if (clusterNode == nullptr) {
+            res.errorCode = -8;
+            return res;
+        }
+        cout << clusterNode->m_strIp << ":" << clusterNode->m_iPort << endl;
+        if (!connectPiRedisClusterNode(clusterNode->m_strIp, clusterNode->m_iPort)) {
+            res.errorCode = -7;
+            return res;
+        }
+
+        return set(key, value);
     }
 
     bool connectPiRedisClusterNode(const std::string& ip, int port) {
