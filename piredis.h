@@ -16,9 +16,11 @@ struct PiRedisReply {
     std::string replyString;
     //  0 reply success
     // -1 reply null
+    // -6 command parameter invalid
     // -7 cluster node connect error
     // -8 cluster inappropriate node
     int errorCode;
+    std::string errorStr;
 };
 
 // enum ReplyCode {
@@ -255,6 +257,40 @@ public:
         }
 
         return getset(key, value);
+    }
+
+    PiRedisReply lpush(const std::string& key, const std::vector<std::string>& value) {
+        PiRedisReply res;
+
+        std::string command = "lpush " + key;
+        if (value.size() == 0) {
+            res.errorCode = -6;
+            res.errorStr = "lpush value is empty";
+            return res;
+        }
+
+        for (const auto& v : value) {
+            command += " " + v;
+        }
+        return sendCommandDirectly(command);
+    }
+
+    PiRedisReply lpushToCluster(const std::string& key, const std::vector<std::string>& value) {
+        PiRedisReply res;
+
+        PiRedisNodeStruct* clusterNode = RedisUtils::getRightClusterNode(key, m_vPiRedisNodes);
+        if (clusterNode == nullptr) {
+            res.errorCode = -8;
+            return res;
+        }
+        cout << clusterNode->m_strIp << ":" << clusterNode->m_iPort << endl;
+        
+        if (!connectPiRedisClusterNode(clusterNode->m_strIp, clusterNode->m_iPort)) {
+            res.errorCode = -7;
+            return res;
+        }
+
+        return lpush(key, value);
     }
 
 

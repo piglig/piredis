@@ -45,6 +45,9 @@ int main(void)
     cout << piRedis.decrToCluster("abc").replyString << endl;
 
     cout << piRedis.getsetToCluster("foo", "newfoo").replyString << endl;
+
+    std::vector<std::string> values{"a", "b", "c"};
+    cout << piRedis.lpushToCluster("foo_list", values).replyString << endl;
     // redisReply *reply = (redisReply *)redisCommand(c, "PING");
     // if (reply == NULL) {
     //     printf("reply is null[%s]\n", c->errstr);
