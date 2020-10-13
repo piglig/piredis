@@ -153,6 +153,14 @@ public:
         return setex(key, seconds, value);
     }
 
+    PiRedisReply incr(const std::string& key) {
+        return sendCommandDirectly("incrby " + key + " 1");
+    }
+
+    PiRedisReply incrToCluster(const std::string& key) {
+        return incrbyToCluster(key, 1);
+    }
+
     PiRedisReply incrby(const std::string& key, int increment) {
         return sendCommandDirectly("incrby " + key + " " + std::to_string(increment));
     }
@@ -195,6 +203,28 @@ public:
         }
 
         return decrby(key, decrement);
+    }
+
+    PiRedisReply append(const std::string& key, const std::string& value) {
+        return sendCommandDirectly("append " + key + " " + value);
+    }
+
+    PiRedisReply appendToCluster(const std::string& key, const std::string& value) {
+        PiRedisReply res;
+
+        PiRedisNodeStruct* clusterNode = RedisUtils::getRightClusterNode(key, m_vPiRedisNodes);
+        if (clusterNode == nullptr) {
+            res.errorCode = -8;
+            return res;
+        }
+        cout << clusterNode->m_strIp << ":" << clusterNode->m_iPort << endl;
+        
+        if (!connectPiRedisClusterNode(clusterNode->m_strIp, clusterNode->m_iPort)) {
+            res.errorCode = -7;
+            return res;
+        }
+
+        return append(key, value);
     }
 
 

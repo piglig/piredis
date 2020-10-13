@@ -35,13 +35,13 @@ int main(void)
 
     // piRedis.connectPiRedisClusterNode("101.37.20.126", 6380);
     cout << piRedis.getFromCluster("foo1").replyString << endl;
-    
+    cout << piRedis.appendToCluster("foo1", "ddd").replyString << endl;
     // cout << piRedis.set("test_set", "100").replyString << endl;
     // cout << piRedis.setexToCluster("zzzz", 20, "value").replyString << endl;
 
     // cout << piRedis.mset(entries).replyString << endl;
     cout << piRedis.decrbyToCluster("abc", 10).replyString << endl;
-
+    cout << piRedis.incrToCluster("abc").replyString << endl;
     // redisReply *reply = (redisReply *)redisCommand(c, "PING");
     // if (reply == NULL) {
     //     printf("reply is null[%s]\n", c->errstr);
