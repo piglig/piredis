@@ -69,6 +69,7 @@ public:
         return res;
     }
 
+    // 根据 key 计算出 slot，然后从 cluster 列表中选择合适的节点
     static PiRedisNodeStruct* getRightClusterNode(const std::string& key, std::vector<PiRedisNodeStruct> clusterNodes) {
         int slot = MyUtils::GetSlotValue(key);
         for (int i = 0; i < clusterNodes.size(); ++i) {

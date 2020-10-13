@@ -3,6 +3,8 @@
 
 #include <iostream>
 #include <string>
+#include <vector>
+#include <map>
 #include <hiredis.h>
 #include "utils/redis_utils.h"
 #include "node.h"
@@ -33,6 +35,7 @@ public:
         struct timeval tv;
         tv.tv_sec = 0;
         tv.tv_usec = m_iTimeout;
+        freeRedis();
         piRedisContext = redisConnectWithTimeout(m_strHost.c_str(), m_iPort, tv);
         if (piRedisContext == nullptr || piRedisContext->err) {
             if (piRedisContext) {
@@ -69,14 +72,17 @@ public:
 
     PiRedisReply sendCommandDirectly(const std::string& command) {
         PiRedisReply res;
-
         redisReply *reply = (redisReply *)redisCommand(piRedisContext, command.c_str());
-        res.replyString = reply->str;
+        
         if (reply == nullptr || reply->type == REDIS_REPLY_ERROR) {
             cout << "reply is error[" << reply->str << "]" << endl;
             res.errorCode = -1;
             freeReplyObject(reply);
             return res;
+        } else if (reply->type == REDIS_REPLY_INTEGER) {
+            res.replyString = std::to_string(reply->integer);
+        } else {
+            res.replyString = reply->str;
         }
 
         res.errorCode = 0;
@@ -87,7 +93,6 @@ public:
     PiRedisReply getFromCluster(const std::string& key) {
         PiRedisReply res;
 
-        unsigned short slot = MyUtils::GetSlotValue(key);
         PiRedisNodeStruct* clusterNode = RedisUtils::getRightClusterNode(key, m_vPiRedisNodes);
         if (clusterNode == nullptr) {
             res.errorCode = -8;
@@ -113,7 +118,6 @@ public:
     PiRedisReply setToCluster(const std::string& key, const std::string& value) {
         PiRedisReply res;
 
-        unsigned short slot = MyUtils::GetSlotValue(key);
         PiRedisNodeStruct* clusterNode = RedisUtils::getRightClusterNode(key, m_vPiRedisNodes);
         if (clusterNode == nullptr) {
             res.errorCode = -8;
@@ -127,6 +131,102 @@ public:
 
         return set(key, value);
     }
+
+    PiRedisReply setex(const std::string& key, int seconds, const std::string& value) {
+        return sendCommandDirectly("setex " + key + " " + std::to_string(seconds) + " " + value);
+    }
+
+    PiRedisReply setexToCluster(const std::string& key, int seconds, const std::string& value) {
+        PiRedisReply res;
+
+        PiRedisNodeStruct* clusterNode = RedisUtils::getRightClusterNode(key, m_vPiRedisNodes);
+        if (clusterNode == nullptr) {
+            res.errorCode = -8;
+            return res;
+        }
+        cout << clusterNode->m_strIp << ":" << clusterNode->m_iPort << endl;
+        if (!connectPiRedisClusterNode(clusterNode->m_strIp, clusterNode->m_iPort)) {
+            res.errorCode = -7;
+            return res;
+        }
+
+        return setex(key, seconds, value);
+    }
+
+    PiRedisReply incrby(const std::string& key, int increment) {
+        return sendCommandDirectly("incrby " + key + " " + std::to_string(increment));
+    }
+
+    PiRedisReply incrbyToCluster(const std::string& key, int increment) {
+        PiRedisReply res;
+
+        PiRedisNodeStruct* clusterNode = RedisUtils::getRightClusterNode(key, m_vPiRedisNodes);
+        if (clusterNode == nullptr) {
+            res.errorCode = -8;
+            return res;
+        }
+        cout << clusterNode->m_strIp << ":" << clusterNode->m_iPort << endl;
+        
+        if (!connectPiRedisClusterNode(clusterNode->m_strIp, clusterNode->m_iPort)) {
+            res.errorCode = -7;
+            return res;
+        }
+
+        return incrby(key, increment);
+    }
+
+    PiRedisReply decrby(const std::string& key, int decrement) {
+        return sendCommandDirectly("decrby " + key + " " + std::to_string(decrement));
+    }
+
+    PiRedisReply decrbyToCluster(const std::string& key, int decrement) {
+        PiRedisReply res;
+
+        PiRedisNodeStruct* clusterNode = RedisUtils::getRightClusterNode(key, m_vPiRedisNodes);
+        if (clusterNode == nullptr) {
+            res.errorCode = -8;
+            return res;
+        }
+        cout << clusterNode->m_strIp << ":" << clusterNode->m_iPort << endl;
+        
+        if (!connectPiRedisClusterNode(clusterNode->m_strIp, clusterNode->m_iPort)) {
+            res.errorCode = -7;
+            return res;
+        }
+
+        return decrby(key, decrement);
+    }
+
+
+
+    // PiRedisReply mset(const std::map<std::string, std::string>& entries) {
+    //     std::string command = "mset";
+    //     for (const auto& entry : entries) {
+    //         command += " " + entry.first + " " + entry.second;
+    //     }
+        
+    //     return sendCommandDirectly(command);
+    // }
+
+    // PiRedisReply msetToCluster(const std::map<std::string, std::string>& entries) {    
+    //     PiRedisReply res;
+
+    //     for (const auto& entry : entries) {
+    //         unsigned short slot = MyUtils::GetSlotValue(entry.first);
+    //         PiRedisNodeStruct* clusterNode = RedisUtils::getRightClusterNode(entry.first, m_vPiRedisNodes);
+    //         if (clusterNode == nullptr) {
+    //             res.errorCode = -8;
+    //             return res;
+    //         }
+    //         cout << clusterNode->m_strIp << ":" << clusterNode->m_iPort << endl;
+    //         if (!connectPiRedisClusterNode(clusterNode->m_strIp, clusterNode->m_iPort)) {
+    //             res.errorCode = -7;
+    //             return res;
+    //         }
+    //     }
+
+    //     return mset(entries);
+    // }
 
     bool connectPiRedisClusterNode(const std::string& ip, int port) {
         m_strHost = ip.c_str();

@@ -45,6 +45,10 @@ iostream
 -
 string
 -
+vector
+-
+map
+-
 hiredis.h
 -
 utils/redis_utils.h

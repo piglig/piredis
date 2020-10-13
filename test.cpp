@@ -19,10 +19,10 @@ enum ReplyCode {
 
 int main(void)
 {
-    struct timeval tv;
-    tv.tv_sec = 0;
-    tv.tv_usec = 100000;
-    PiRedis piRedis("101.37.20.126", 6379);
+    // struct timeval tv;
+    // tv.tv_sec = 0;
+    // tv.tv_usec = 100000;
+    PiRedis piRedis("101.37.20.126", 6381);
     
     if (piRedis.init()) {
         cout << "init success" << endl;
@@ -34,8 +34,13 @@ int main(void)
     }
 
     // piRedis.connectPiRedisClusterNode("101.37.20.126", 6380);
-    // cout << piRedis.getFromCluster("foo1").replyString << endl;
-    cout << piRedis.set("test_set", "100").replyString << endl;
+    cout << piRedis.getFromCluster("foo1").replyString << endl;
+    
+    // cout << piRedis.set("test_set", "100").replyString << endl;
+    // cout << piRedis.setexToCluster("zzzz", 20, "value").replyString << endl;
+
+    // cout << piRedis.mset(entries).replyString << endl;
+    cout << piRedis.decrbyToCluster("abc", 10).replyString << endl;
 
     // redisReply *reply = (redisReply *)redisCommand(c, "PING");
     // if (reply == NULL) {
