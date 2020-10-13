@@ -35,7 +35,7 @@ public:
         struct timeval tv;
         tv.tv_sec = 0;
         tv.tv_usec = m_iTimeout;
-        freeRedis();
+        // freeRedis();
         piRedisContext = redisConnectWithTimeout(m_strHost.c_str(), m_iPort, tv);
         if (piRedisContext == nullptr || piRedisContext->err) {
             if (piRedisContext) {
@@ -183,6 +183,14 @@ public:
         return incrby(key, increment);
     }
 
+    PiRedisReply decr(const std::string& key) {
+        return sendCommandDirectly("decrby " + key + " 1");
+    }
+
+    PiRedisReply decrToCluster(const std::string& key) {
+        return decrbyToCluster(key, 1);
+    }
+
     PiRedisReply decrby(const std::string& key, int decrement) {
         return sendCommandDirectly("decrby " + key + " " + std::to_string(decrement));
     }
@@ -226,6 +234,30 @@ public:
 
         return append(key, value);
     }
+
+    PiRedisReply getset(const std::string& key, const std::string& value) {
+        return sendCommandDirectly("getset " + key + " " + value);
+    }
+
+    PiRedisReply getsetToCluster(const std::string& key, const std::string& value) {
+        PiRedisReply res;
+
+        PiRedisNodeStruct* clusterNode = RedisUtils::getRightClusterNode(key, m_vPiRedisNodes);
+        if (clusterNode == nullptr) {
+            res.errorCode = -8;
+            return res;
+        }
+        cout << clusterNode->m_strIp << ":" << clusterNode->m_iPort << endl;
+        
+        if (!connectPiRedisClusterNode(clusterNode->m_strIp, clusterNode->m_iPort)) {
+            res.errorCode = -7;
+            return res;
+        }
+
+        return getset(key, value);
+    }
+
+
 
 
 
