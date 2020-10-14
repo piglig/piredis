@@ -27,3 +27,16 @@
 // let prefabPath =  "Game/prefabs/Game/GameMenu";
 // console.log(prefabPath.split(",")[1]);
 // console.log(myClass.hasOwnProperty('MyClassNumber'));
+
+let array = [];
+
+function test(arr, something) {
+    arr.push(something);
+}
+
+test(array, "fsdf");
+
+console.log(array);
+
+let testName = {type: "type", result: "result"}
+console.log(typeof testName == 'object');

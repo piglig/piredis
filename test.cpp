@@ -77,6 +77,16 @@ int main(void)
         cout << reply.errorStr << endl;
     }
 
+    reply = piRedis.lrangeToCluster("foo_list", 0, -1);
+    if (reply.errorCode == REDIS_OK) {
+        for (const auto& item : reply.replyElements) {
+            cout << item << endl;
+        }
+        
+    } else {
+        cout << reply.errorStr << endl;
+    }
+
     
 
     // redisReply *reply = (redisReply *)redisCommand(c, "PING");

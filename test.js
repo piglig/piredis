@@ -1,4 +1,3 @@
-var WebSocket = require('ws');
 // class MyClass {
 //     public onopen: Function = null;
 //     MyClassName: string;
@@ -19,7 +18,11 @@ var WebSocket = require('ws');
 // let prefabPath =  "Game/prefabs/Game/GameMenu";
 // console.log(prefabPath.split(",")[1]);
 // console.log(myClass.hasOwnProperty('MyClassNumber'));
-var ws = new WebSocket('ws://10.10.243.226:8000/');
-ws.onmessage = function (event) {
-    console.log(event.data);
-};
+var array = [];
+function test(arr, something) {
+    arr.push(something);
+}
+test(array, "fsdf");
+console.log(array);
+var testName = { type: "type", result: "result" };
+console.log(typeof testName == 'object');

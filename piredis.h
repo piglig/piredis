@@ -14,6 +14,7 @@ using std::endl;
 
 struct PiRedisReply {
     std::string replyString;
+    std::vector<std::string> replyElements;
     //  0 reply success
     // -1 reply null
     // -6 command parameter invalid
@@ -88,6 +89,10 @@ public:
             res.errorStr = "reply is error[empty]";
             freeReplyObject(reply);
             return res;
+        } else if (reply->type == REDIS_REPLY_ARRAY) {
+            for (int i = 0; i < reply->elements; ++i) {
+                res.replyElements.push_back(reply->element[i]->str);
+            }
         } else {
             res.replyString = reply->str;
         }
@@ -465,6 +470,19 @@ public:
         PiRedisReply reply = searchTargetClusterNode(key, m_vPiRedisNodes);
         if (reply.errorCode == REDIS_OK) {
             return rpushx(key, value);
+        }
+        
+        return reply;
+    }
+
+    PiRedisReply lrange(const std::string& key, int start, int end) {
+        return sendCommandDirectly("lrange " + key + " " + std::to_string(start) + " " + std::to_string(end));
+    }
+
+    PiRedisReply lrangeToCluster(const std::string& key, int start, int end) {
+        PiRedisReply reply = searchTargetClusterNode(key, m_vPiRedisNodes);
+        if (reply.errorCode == REDIS_OK) {
+            return lrange(key, start, end);
         }
         
         return reply;
