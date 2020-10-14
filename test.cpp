@@ -70,6 +70,13 @@ int main(void)
         cout << reply.errorStr << endl;
     }
 
+    reply = piRedis.rpushxToCluster("zxvcz", values);
+    if (reply.errorCode == REDIS_OK) {
+        cout << reply.replyString << endl;
+    } else {
+        cout << reply.errorStr << endl;
+    }
+
     
 
     // redisReply *reply = (redisReply *)redisCommand(c, "PING");

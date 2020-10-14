@@ -437,21 +437,37 @@ public:
     }
 
     PiRedisReply lpushxToCluster(const std::string& key, const std::vector<std::string>& value) {
+        PiRedisReply reply = searchTargetClusterNode(key, m_vPiRedisNodes);
+        if (reply.errorCode == REDIS_OK) {
+            return lpushx(key, value);
+        }
+        
+        return reply;
+    }
+
+    PiRedisReply rpushx(const std::string& key, const std::vector<std::string>& value) {
         PiRedisReply res;
 
-        PiRedisNodeStruct* clusterNode = RedisUtils::getRightClusterNode(key, m_vPiRedisNodes);
-        if (clusterNode == nullptr) {
-            res.errorCode = -8;
-            return res;
-        }
-        cout << clusterNode->m_strIp << ":" << clusterNode->m_iPort << endl;
-        
-        if (!connectPiRedisClusterNode(clusterNode->m_strIp, clusterNode->m_iPort)) {
-            res.errorCode = -7;
+        std::string command = "rpushx " + key;
+        if (value.size() == 0) {
+            res.errorCode = -6;
+            res.errorStr = "rpushx value is empty";
             return res;
         }
 
-        return lpushx(key, value);
+        for (const auto& v : value) {
+            command += " " + v;
+        }
+        return sendCommandDirectly(command);
+    }
+
+    PiRedisReply rpushxToCluster(const std::string& key, const std::vector<std::string>& value) {
+        PiRedisReply reply = searchTargetClusterNode(key, m_vPiRedisNodes);
+        if (reply.errorCode == REDIS_OK) {
+            return rpushx(key, value);
+        }
+        
+        return reply;
     }
 
 
@@ -486,6 +502,26 @@ public:
 
     //     return mset(entries);
     // }
+
+    PiRedisReply searchTargetClusterNode(const std::string& key, std::vector<PiRedisNodeStruct> clusterNodes) {
+        PiRedisReply res;
+
+        PiRedisNodeStruct* clusterNode = RedisUtils::getRightClusterNode(key, m_vPiRedisNodes);
+        if (clusterNode == nullptr) {
+            cout << "clusterNode is null" << endl;
+            res.errorCode = -8;
+            return res;
+        }
+        cout << clusterNode->m_strIp << ":" << clusterNode->m_iPort << endl;
+        
+        if (!connectPiRedisClusterNode(clusterNode->m_strIp, clusterNode->m_iPort)) {
+            cout << "clusterNode cannot find \"" << key << "\"" << endl;
+            res.errorCode = -7;
+            return res;
+        }
+        res.errorCode = 0;
+        return res;
+    }
 
     bool connectPiRedisClusterNode(const std::string& ip, int port) {
         m_strHost = ip.c_str();
