@@ -33,9 +33,11 @@ int main(void)
         cout << "set cluster mode success" << endl;
     }
 
+    PiRedisReply reply;
+
     // piRedis.connectPiRedisClusterNode("101.37.20.126", 6380);
     cout << piRedis.getFromCluster("foo1").replyString << endl;
-    cout << piRedis.appendToCluster("foo1", "ddd").replyString << endl;
+    // cout << piRedis.appendToCluster("foo1", "ddd").replyString << endl;
     // cout << piRedis.set("test_set", "100").replyString << endl;
     // cout << piRedis.setexToCluster("zzzz", 20, "value").replyString << endl;
 
@@ -47,7 +49,29 @@ int main(void)
     cout << piRedis.getsetToCluster("foo", "newfoo").replyString << endl;
 
     std::vector<std::string> values{"a", "b", "c"};
-    cout << piRedis.lpushToCluster("foo_list", values).replyString << endl;
+    // cout << piRedis.lpushToCluster("foo_list", values).replyString << endl;
+    // cout << piRedis.lpopToCluster("foo_list").replyString << endl;
+    // cout << piRedis.rpushToCluster("foo_list", values).replyString << endl;
+    // cout << piRedis.rpopToCluster("foo_list").replyString << endl;
+
+    cout << piRedis.llenToCluster("foo_list").replyString << endl;
+
+    reply = piRedis.lindexToCluster("foo_list", 10);
+    if (reply.errorCode == REDIS_OK) {
+        cout << reply.replyString << endl;
+    } else {
+        cout << reply.errorStr << endl;
+    }
+
+    reply = piRedis.lpushxToCluster("zxvcz", values);
+    if (reply.errorCode == REDIS_OK) {
+        cout << reply.replyString << endl;
+    } else {
+        cout << reply.errorStr << endl;
+    }
+
+    
+
     // redisReply *reply = (redisReply *)redisCommand(c, "PING");
     // if (reply == NULL) {
     //     printf("reply is null[%s]\n", c->errstr);

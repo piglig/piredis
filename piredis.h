@@ -75,14 +75,19 @@ public:
     PiRedisReply sendCommandDirectly(const std::string& command) {
         PiRedisReply res;
         redisReply *reply = (redisReply *)redisCommand(piRedisContext, command.c_str());
-        
+        cout << "command:" << command << " " << reply->type << endl;
         if (reply == nullptr || reply->type == REDIS_REPLY_ERROR) {
-            cout << "reply is error[" << reply->str << "]" << endl;
+            res.errorStr = "reply is error[" + std::string(reply->str) + "]";
             res.errorCode = -1;
             freeReplyObject(reply);
             return res;
         } else if (reply->type == REDIS_REPLY_INTEGER) {
             res.replyString = std::to_string(reply->integer);
+        } else if (reply->type == REDIS_REPLY_NIL) {
+            res.errorCode = -1;
+            res.errorStr = "reply is error[empty]";
+            freeReplyObject(reply);
+            return res;
         } else {
             res.replyString = reply->str;
         }
@@ -291,6 +296,162 @@ public:
         }
 
         return lpush(key, value);
+    }
+
+    PiRedisReply lpop(const std::string& key) {
+        return sendCommandDirectly("lpop " + key);
+    }
+
+    PiRedisReply lpopToCluster(const std::string& key) {
+        PiRedisReply res;
+
+        PiRedisNodeStruct* clusterNode = RedisUtils::getRightClusterNode(key, m_vPiRedisNodes);
+        if (clusterNode == nullptr) {
+            res.errorCode = -8;
+            return res;
+        }
+        cout << clusterNode->m_strIp << ":" << clusterNode->m_iPort << endl;
+        
+        if (!connectPiRedisClusterNode(clusterNode->m_strIp, clusterNode->m_iPort)) {
+            res.errorCode = -7;
+            return res;
+        }
+
+        return lpop(key);
+    }
+
+    PiRedisReply rpush(const std::string& key, const std::vector<std::string>& value) {
+        PiRedisReply res;
+
+        std::string command = "rpush " + key;
+        if (value.size() == 0) {
+            res.errorCode = -6;
+            res.errorStr = "rpush value is empty";
+            return res;
+        }
+
+        for (const auto& v : value) {
+            command += " " + v;
+        }
+        return sendCommandDirectly(command);
+    }
+
+    PiRedisReply rpushToCluster(const std::string& key, const std::vector<std::string>& value) {
+        PiRedisReply res;
+
+        PiRedisNodeStruct* clusterNode = RedisUtils::getRightClusterNode(key, m_vPiRedisNodes);
+        if (clusterNode == nullptr) {
+            res.errorCode = -8;
+            return res;
+        }
+        cout << clusterNode->m_strIp << ":" << clusterNode->m_iPort << endl;
+        
+        if (!connectPiRedisClusterNode(clusterNode->m_strIp, clusterNode->m_iPort)) {
+            res.errorCode = -7;
+            return res;
+        }
+
+        return rpush(key, value);
+    }
+
+    PiRedisReply rpop(const std::string& key) {
+        return sendCommandDirectly("rpop " + key);
+    }
+
+    PiRedisReply rpopToCluster(const std::string& key) {
+        PiRedisReply res;
+
+        PiRedisNodeStruct* clusterNode = RedisUtils::getRightClusterNode(key, m_vPiRedisNodes);
+        if (clusterNode == nullptr) {
+            res.errorCode = -8;
+            return res;
+        }
+        cout << clusterNode->m_strIp << ":" << clusterNode->m_iPort << endl;
+        
+        if (!connectPiRedisClusterNode(clusterNode->m_strIp, clusterNode->m_iPort)) {
+            res.errorCode = -7;
+            return res;
+        }
+
+        return rpop(key);
+    }
+
+    PiRedisReply llen(const std::string& key) {
+        return sendCommandDirectly("llen " + key);
+    }
+
+    PiRedisReply llenToCluster(const std::string& key) {
+        PiRedisReply res;
+
+        PiRedisNodeStruct* clusterNode = RedisUtils::getRightClusterNode(key, m_vPiRedisNodes);
+        if (clusterNode == nullptr) {
+            res.errorCode = -8;
+            return res;
+        }
+        cout << clusterNode->m_strIp << ":" << clusterNode->m_iPort << endl;
+        
+        if (!connectPiRedisClusterNode(clusterNode->m_strIp, clusterNode->m_iPort)) {
+            res.errorCode = -7;
+            return res;
+        }
+
+        return llen(key);
+    }
+
+    PiRedisReply lindex(const std::string& key, int index) {
+        return sendCommandDirectly("lindex " + key + " " + std::to_string(index));
+    }
+
+    PiRedisReply lindexToCluster(const std::string& key, int index) {
+        PiRedisReply res;
+
+        PiRedisNodeStruct* clusterNode = RedisUtils::getRightClusterNode(key, m_vPiRedisNodes);
+        if (clusterNode == nullptr) {
+            res.errorCode = -8;
+            return res;
+        }
+        cout << clusterNode->m_strIp << ":" << clusterNode->m_iPort << endl;
+        
+        if (!connectPiRedisClusterNode(clusterNode->m_strIp, clusterNode->m_iPort)) {
+            res.errorCode = -7;
+            return res;
+        }
+
+        return lindex(key, index);
+    }
+
+    PiRedisReply lpushx(const std::string& key, const std::vector<std::string>& value) {
+        PiRedisReply res;
+
+        std::string command = "lpushx " + key;
+        if (value.size() == 0) {
+            res.errorCode = -6;
+            res.errorStr = "lpushx value is empty";
+            return res;
+        }
+
+        for (const auto& v : value) {
+            command += " " + v;
+        }
+        return sendCommandDirectly(command);
+    }
+
+    PiRedisReply lpushxToCluster(const std::string& key, const std::vector<std::string>& value) {
+        PiRedisReply res;
+
+        PiRedisNodeStruct* clusterNode = RedisUtils::getRightClusterNode(key, m_vPiRedisNodes);
+        if (clusterNode == nullptr) {
+            res.errorCode = -8;
+            return res;
+        }
+        cout << clusterNode->m_strIp << ":" << clusterNode->m_iPort << endl;
+        
+        if (!connectPiRedisClusterNode(clusterNode->m_strIp, clusterNode->m_iPort)) {
+            res.errorCode = -7;
+            return res;
+        }
+
+        return lpushx(key, value);
     }
 
 
