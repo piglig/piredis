@@ -23,7 +23,7 @@ public:
         std::vector<std::string> nodeInfo = MyUtils::SplitString(nodeStr, " ");
         
         PiRedisNodeStruct res;
-        for (int i = 0; i < nodeInfo.size(); ++i)
+        for (size_t i = 0; i < nodeInfo.size(); ++i)
         {
             switch (i)
             {
@@ -72,7 +72,7 @@ public:
     // 根据 key 计算出 slot，然后从 cluster 列表中选择合适的节点
     static PiRedisNodeStruct* getRightClusterNode(const std::string& key, std::vector<PiRedisNodeStruct> clusterNodes) {
         int slot = MyUtils::GetSlotValue(key);
-        for (int i = 0; i < clusterNodes.size(); ++i) {
+        for (size_t i = 0; i < clusterNodes.size(); ++i) {
             if (slot >= clusterNodes[i].m_iSlotBegin && slot <= clusterNodes[i].m_iSlotEnd) {
                 return &clusterNodes[i];
             }

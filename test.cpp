@@ -87,7 +87,46 @@ int main(void)
         cout << reply.errorStr << endl;
     }
 
-    
+    reply = piRedis.lsetToCluster("foo_list", 0, "lset_value");
+    if (reply.errorCode == REDIS_OK) {
+        cout << reply.replyString << endl;
+    } else {
+        cout << reply.errorStr << endl;
+    }
+
+    struct ListOptionalArgs args;
+    args.option = ListOptions::COUNT;
+    args.optionValue = 2;
+
+    std::vector<ListOptionalArgs> options = { 
+        {ListOptions::COUNT, 0},
+        {ListOptions::RANK, 2},
+        {ListOptions::MAXLEN, 1}
+    };
+    reply = piRedis.lposToCluster("mylist", "c", args);
+    if (reply.errorCode == REDIS_OK) {
+        for (const auto& item : reply.replyElements) {
+            cout << item << endl;
+        }
+    } else {
+        cout << reply.errorStr << endl;
+    }
+
+    reply = piRedis.lposToCluster("mylist", "c", options);
+    if (reply.errorCode == REDIS_OK) {
+        for (const auto& item : reply.replyElements) {
+            cout << item << endl;
+        }
+    } else {
+        cout << reply.errorStr << endl;
+    }
+
+    // reply = piRedis.ltrimToCluster("mylist", 1, 3);
+    // if (reply.errorCode == REDIS_OK) {
+    //     cout << reply.replyString << endl;
+    // } else {
+    //     cout << reply.errorStr << endl;
+    // }
 
     // redisReply *reply = (redisReply *)redisCommand(c, "PING");
     // if (reply == NULL) {

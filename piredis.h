@@ -20,8 +20,20 @@ struct PiRedisReply {
     // -6 command parameter invalid
     // -7 cluster node connect error
     // -8 cluster inappropriate node
+    // -9 list operate option invalid
     int errorCode;
     std::string errorStr;
+};
+
+enum ListOptions {
+    RANK,
+    COUNT,
+    MAXLEN
+};
+
+struct ListOptionalArgs {
+    ListOptions option;
+    int optionValue;
 };
 
 // enum ReplyCode {
@@ -77,8 +89,9 @@ public:
         PiRedisReply res;
         redisReply *reply = (redisReply *)redisCommand(piRedisContext, command.c_str());
         cout << "command:" << command << " " << reply->type << endl;
-        if (reply == nullptr || reply->type == REDIS_REPLY_ERROR) {
-            res.errorStr = "reply is error[" + std::string(reply->str) + "]";
+        if (reply->type == REDIS_REPLY_ERROR) {
+            std::string temp{REDIS_REPLY_STATUS};
+            res.errorStr = "reply is error[" + temp + "]";
             res.errorCode = -1;
             freeReplyObject(reply);
             return res;
@@ -90,9 +103,17 @@ public:
             freeReplyObject(reply);
             return res;
         } else if (reply->type == REDIS_REPLY_ARRAY) {
-            for (int i = 0; i < reply->elements; ++i) {
-                res.replyElements.push_back(reply->element[i]->str);
+            for (size_t i = 0; i < reply->elements; ++i) {
+                // 返回 integer 数组
+                if (reply->element[i]->str == nullptr) {
+                    res.replyElements.push_back(std::to_string(reply->element[i]->integer));
+                // 返回 字符串 数组
+                } else {
+                    res.replyElements.push_back(reply->element[i]->str);
+                }
+                
             }
+            res.replyString = "REDIS_REPLY_ARRAY";
         } else {
             res.replyString = reply->str;
         }
@@ -483,6 +504,114 @@ public:
         PiRedisReply reply = searchTargetClusterNode(key, m_vPiRedisNodes);
         if (reply.errorCode == REDIS_OK) {
             return lrange(key, start, end);
+        }
+        
+        return reply;
+    }
+
+    PiRedisReply lset(const std::string& key, int index, const std::string& value) {
+        return sendCommandDirectly("lset " + key + " " + std::to_string(index) + " " + value);
+    }
+
+    PiRedisReply lsetToCluster(const std::string& key, int index, const std::string& value) {
+        PiRedisReply reply = searchTargetClusterNode(key, m_vPiRedisNodes);
+        if (reply.errorCode == REDIS_OK) {
+            return lset(key, index, value);
+        }
+        
+        return reply;
+    }
+
+    PiRedisReply lpos(const std::string& key, const std::string& value) {
+        return sendCommandDirectly("lpos " + key + " " + value);
+    }
+
+    PiRedisReply lpos(const std::string& key, const std::string& value, ListOptionalArgs args) {
+        std::string command = "lpos ";
+        if (args.option == ListOptions::RANK) {
+            command += key + " " + value + " RANK " + std::to_string(args.optionValue);
+        } else if (args.option == ListOptions::COUNT) {
+            command += key + " " + value + " COUNT " + std::to_string(args.optionValue);
+        }
+        return sendCommandDirectly(command);
+    }
+
+    // 其实 args 数组长度最多为 3
+    PiRedisReply lpos(const std::string& key, const std::string& value, std::vector<ListOptionalArgs> args) {
+        PiRedisReply res;
+        std::string command = "lpos " + key + " " + value;
+        ListOptionalArgs temp = args[0];
+
+        if (temp.option == args[args.size() - 1].option) {
+            res.errorCode = -9;
+            res.errorStr = "lpos option1[" + std::to_string(temp.option) + "] same as option2[" + std::to_string(args[args.size() - 1].option) + "]";
+            return res;
+        }
+
+        if (temp.option == ListOptions::RANK) {
+            command += " RANK " + std::to_string(temp.optionValue);
+        } else if (temp.option == ListOptions::COUNT) {
+            command += " COUNT " + std::to_string(temp.optionValue);
+        } else if (temp.option == ListOptions::MAXLEN) {
+            command += " MAXLEN " + std::to_string(temp.optionValue);
+        }
+
+        for (size_t i = 1; i < args.size(); ++i) {
+            if (temp.option == args[i].option) {    
+                res.errorCode = -9;
+                res.errorStr = "lpos option1[" + std::to_string(temp.option) + "] same as option2[" + std::to_string(args[i].option) + "]";
+                return res;
+            }
+
+            if (args[i].option == ListOptions::RANK) {
+                command += " RANK " + std::to_string(args[i].optionValue);
+            } else if (args[i].option == ListOptions::COUNT) {
+                command += " COUNT " + std::to_string(args[i].optionValue);
+            } else if (args[i].option == ListOptions::MAXLEN) {
+                command += " MAXLEN " + std::to_string(args[i].optionValue);
+            }
+            
+            temp = args[i];
+        }
+        cout << command << endl;
+        return sendCommandDirectly(command);
+    }
+
+    PiRedisReply lposToCluster(const std::string& key, const std::string& value) {
+        PiRedisReply reply = searchTargetClusterNode(key, m_vPiRedisNodes);
+        if (reply.errorCode == REDIS_OK) {
+            return lpos(key, value);
+        }
+        
+        return reply;
+    }
+
+    PiRedisReply lposToCluster(const std::string& key, const std::string& value, ListOptionalArgs args) {
+        PiRedisReply reply = searchTargetClusterNode(key, m_vPiRedisNodes);
+        if (reply.errorCode == REDIS_OK) {
+            return lpos(key, value, args);
+        }
+        
+        return reply;
+    }
+
+    PiRedisReply lposToCluster(const std::string& key, const std::string& value, std::vector<ListOptionalArgs> args) {
+        PiRedisReply reply = searchTargetClusterNode(key, m_vPiRedisNodes);
+        if (reply.errorCode == REDIS_OK) {
+            return lpos(key, value, args);
+        }
+        
+        return reply;
+    }
+
+    PiRedisReply ltrim(const std::string& key, int start, int end) {
+        return sendCommandDirectly("ltrim " + key + " " + std::to_string(start) + " " + std::to_string(end));
+    }
+
+    PiRedisReply ltrimToCluster(const std::string& key, int start, int end) {
+        PiRedisReply reply = searchTargetClusterNode(key, m_vPiRedisNodes);
+        if (reply.errorCode == REDIS_OK) {
+            return ltrim(key, start, end);
         }
         
         return reply;
