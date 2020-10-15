@@ -121,6 +121,13 @@ int main(void)
         cout << reply.errorStr << endl;
     }
 
+    reply = piRedis.saddToCluster("myset", {"abc", "bcd"});
+    if (reply.errorCode == REDIS_OK) {
+        cout << reply.replyString << endl;
+    } else {
+        cout << reply.errorStr << endl;
+    }
+
     // reply = piRedis.ltrimToCluster("mylist", 1, 3);
     // if (reply.errorCode == REDIS_OK) {
     //     cout << reply.replyString << endl;

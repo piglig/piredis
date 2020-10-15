@@ -402,6 +402,8 @@ public:
         return rpop(key);
     }
 
+    // list start
+    // --------------------------------
     PiRedisReply llen(const std::string& key) {
         return sendCommandDirectly("llen " + key);
     }
@@ -616,7 +618,30 @@ public:
         
         return reply;
     }
+    // list end
+    // --------------------------------
 
+
+    // set start
+    // --------------------------------
+    PiRedisReply sadd(const std::string& key, const std::vector<std::string>& members) {
+        std::string command = "sadd " + key;
+        
+        for_each(members.begin(), members.end(), [&](const std::string& member) {
+            command += " " + member;
+        });
+        
+        return sendCommandDirectly(command);
+    }
+
+    PiRedisReply saddToCluster(const std::string& key, const std::vector<std::string>& members) {
+        PiRedisReply reply = searchTargetClusterNode(key, m_vPiRedisNodes);
+        if (reply.errorCode == REDIS_OK) {
+            return sadd(key, members);
+        }
+        
+        return reply;
+    }
 
 
 
