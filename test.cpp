@@ -1,13 +1,8 @@
 #include <iostream>
-#include <vector>
 #include <algorithm>
-#include <hiredis.h>
+
 #include <cstdint>
 #include "piredis.h"
-#include "utils/utils.h"
-#include "utils/redis_utils.h"
-
-#include "node.h"
 
 using std::cout;
 using std::endl;
@@ -170,8 +165,7 @@ int main(void)
     // }
     // freeReplyObject(reply);
 
-    std::string mystr = "foo1";
-    std::cout << MyUtils::GetSlotValue(mystr) << std::endl;
+
 
     return 0;
 }
