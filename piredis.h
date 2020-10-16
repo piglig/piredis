@@ -82,7 +82,12 @@ public:
             temp.m_strIp = m_strHost;
             m_vPiRedisNodes.push_back(temp);
         });
+        m_bClusterMode = true;
         return true;
+    }
+
+    void closeClusterMode() {
+        
     }
 
     PiRedisReply sendCommandDirectly(const std::string& command) {
@@ -643,6 +648,60 @@ public:
         return reply;
     }
 
+    PiRedisReply scard(const std::string& key) {
+        return sendCommandDirectly("scard " + key);
+    }
+
+    PiRedisReply scardToCluster(const std::string& key) {
+        PiRedisReply reply = searchTargetClusterNode(key, m_vPiRedisNodes);
+        if (reply.errorCode == REDIS_OK) {
+            return scard(key);
+        }
+        
+        return reply;
+    }
+
+    PiRedisReply sdiff(std::vector<std::string>& keys) {
+        std::string command = "sdiff";
+        
+        for_each(keys.begin(), keys.end(), [&](const std::string& key) {
+            command += " " + key;
+        });
+        
+        return sendCommandDirectly(command);
+    }
+
+    // PiRedisReply sdiffToCluster(std::vector<std::string>& keys) {
+    //     PiRedisReply reply = searchTargetClusterNode(keys[0], m_vPiRedisNodes);
+    //     if (reply.errorCode == REDIS_OK) {
+    //         return sadd(key, members);
+    //     }
+        
+    //     return reply;
+    // }
+
+    PiRedisReply smembers(const std::string& key) {
+        return sendCommandDirectly("smembers " + key);
+    }
+
+    PiRedisReply smembersToCluster(const std::string& key) {
+        PiRedisReply reply = searchTargetClusterNode(key, m_vPiRedisNodes);
+        if (reply.errorCode == REDIS_OK) {
+            return smembers(key);
+        }
+        
+        return reply;
+    }
+
+    PiRedisReply sismember(const std::string& key, const std::string& member) {
+        if (m_bClusterMode) {
+            PiRedisReply reply = searchTargetClusterNode(key, m_vPiRedisNodes);
+            if (reply.errorCode != REDIS_OK) {
+                return reply;
+            }
+        }
+        return sendCommandDirectly("sismember " + key + " " + member);
+    }
 
 
 
@@ -709,6 +768,9 @@ public:
 private:
     std::vector<PiRedisNodeStruct> m_vPiRedisNodes;
     std::string m_strHost;
+
+    bool m_bClusterMode;
+
     int m_iPort;
     int m_iTimeout;
     redisContext *piRedisContext;

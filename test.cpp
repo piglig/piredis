@@ -123,6 +123,32 @@ int main(void)
         cout << reply.errorStr << endl;
     }
 
+    // scard test
+    reply = piRedis.scardToCluster("myset");
+    if (reply.errorCode == REDIS_OK) {
+        cout << reply.replyString << endl;
+    } else {
+        cout << reply.errorStr << endl;
+    }
+
+    // smembers test
+    reply = piRedis.smembersToCluster("myset");
+    if (reply.errorCode == REDIS_OK) {
+        for (const auto& item : reply.replyElements) {
+            cout << item << endl;
+        }
+    } else {
+        cout << reply.errorStr << endl;
+    }
+
+    // sismember test
+    reply = piRedis.sismember("myset", "abc");
+    if (reply.errorCode == REDIS_OK) {
+        cout << reply.replyString << endl;
+    } else {
+        cout << reply.errorStr << endl;
+    }
+
     // reply = piRedis.ltrimToCluster("mylist", 1, 3);
     // if (reply.errorCode == REDIS_OK) {
     //     cout << reply.replyString << endl;
