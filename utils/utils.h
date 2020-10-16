@@ -71,6 +71,26 @@ public:
         }
         return CRC16_XMODEM(&(key.substr(begin + 1, end - begin - 1))[0], end - begin - 1) % 16384;
     }
+
+    static std::string connacateStringVector(const std::vector<std::string>& vs) {
+        std::string res = "";
+
+        for_each(vs.begin(), vs.end(), [&](const auto& str) {
+            res += str + " ";
+        });
+
+        return res;
+    }
+
+    static std::string connacateStringPairHashMap(const std::map<std::string, std::string>& pairs) {
+        std::string res = "";
+
+        for (const auto& pair : pairs) {
+            res += pair.first + " " + pair.second + " ";
+        }
+
+        return res;
+    }
 };
 
 #endif

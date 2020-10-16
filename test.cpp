@@ -149,6 +149,86 @@ int main(void)
         cout << reply.errorStr << endl;
     }
 
+    // hset test
+    const std::map<std::string, std::string>& pairs{
+        {"field1", "value1"},
+        {"field2", "value2"}
+    };
+    reply = piRedis.hset("myhash", pairs);
+    if (reply.errorCode == REDIS_OK) {
+        cout << reply.replyString << endl;
+    } else {
+        cout << reply.errorStr << endl;
+    }
+
+    // hget test
+    reply = piRedis.hget("myhash", "field1");
+    if (reply.errorCode == REDIS_OK) {
+        cout << reply.replyString << endl;
+    } else {
+        cout << reply.errorStr << endl;
+    }
+
+    // hdel test
+    // reply = piRedis.hdel("myhash", "field1");
+    // if (reply.errorCode == REDIS_OK) {
+    //     cout << reply.replyString << endl;
+    // } else {
+    //     cout << reply.errorStr << endl;
+    // }
+
+    // hexists test
+    reply = piRedis.hdel("myhash", "field1");
+    if (reply.errorCode == REDIS_OK) {
+        cout << reply.replyString << endl;
+    } else {
+        cout << reply.errorStr << endl;
+    }
+
+    // hgetall test
+    reply = piRedis.hgetall("myhash");
+    if (reply.errorCode == REDIS_OK) {
+        for (const auto& item : reply.replyElements) {
+            cout << item << endl;
+        }
+    } else {
+        cout << reply.errorStr << endl;
+    }
+
+    // hincrby test
+    reply = piRedis.hincrby("myhash", "number1", 1);
+    if (reply.errorCode == REDIS_OK) {
+        cout << reply.replyString << endl;
+    } else {
+        cout << reply.errorStr << endl;
+    }
+
+    // hincrbyfloat test
+    reply = piRedis.hincrbyfloat("myhash", "float1", 1.813);
+    if (reply.errorCode == REDIS_OK) {
+        cout << reply.replyString << endl;
+    } else {
+        cout << reply.errorStr << endl;
+    }
+
+    // hkeys test
+    reply = piRedis.hkeys("myhash");
+    if (reply.errorCode == REDIS_OK) {
+        for (const auto& item : reply.replyElements) {
+            cout << item << endl;
+        }
+    } else {
+        cout << reply.errorStr << endl;
+    }
+
+    // hincrbyfloat test
+    reply = piRedis.hlen("myhash");
+    if (reply.errorCode == REDIS_OK) {
+        cout << reply.replyString << endl;
+    } else {
+        cout << reply.errorStr << endl;
+    }
+
     // reply = piRedis.ltrimToCluster("mylist", 1, 3);
     // if (reply.errorCode == REDIS_OK) {
     //     cout << reply.replyString << endl;

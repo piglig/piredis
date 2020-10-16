@@ -12,7 +12,10 @@
 using std::cout;
 using std::endl;
 
+#define int64 int64_t 
+
 struct PiRedisReply {
+    std::string replyType;
     std::string replyString;
     std::vector<std::string> replyElements;
     //  0 reply success
@@ -97,6 +100,7 @@ public:
         if (reply->type == REDIS_REPLY_ERROR) {
             std::string temp{REDIS_REPLY_STATUS};
             res.errorStr = "reply is error[" + temp + "]";
+            cout << "this is:" << REDIS_REPLY_ERROR << std::endl;
             res.errorCode = -1;
             freeReplyObject(reply);
             return res;
@@ -703,6 +707,128 @@ public:
         return sendCommandDirectly("sismember " + key + " " + member);
     }
 
+    // source 和 destination 处于不同的 slot 上无法操作
+    PiRedisReply smove(const std::string& source, const std::string& destination, const std::string& member) {
+        return sendCommandDirectly("smove " + source + " " + destination + " " + member);
+    }
+    // set end
+    // --------------------------------
+
+
+    // set start
+    // --------------------------------
+    PiRedisReply hset(const std::string& key, const std::map<std::string, std::string>& pairs) {
+        if (m_bClusterMode) {
+            PiRedisReply reply = searchTargetClusterNode(key, m_vPiRedisNodes);
+            if (reply.errorCode != REDIS_OK) {
+                return reply;
+            }
+        }
+
+        std::string command = MyUtils::connacateStringPairHashMap(pairs);
+        return sendCommandDirectly("hset " + key + " " + command);
+    }
+
+    PiRedisReply hget(const std::string& key, const std::string& field) {
+        if (m_bClusterMode) {
+            PiRedisReply reply = searchTargetClusterNode(key, m_vPiRedisNodes);
+            if (reply.errorCode != REDIS_OK) {
+                return reply;
+            }
+        }
+
+        return sendCommandDirectly("hget " + key + " " + field);
+    }
+
+    PiRedisReply hdel(const std::string& key, const std::string& field) {
+        if (m_bClusterMode) {
+            PiRedisReply reply = searchTargetClusterNode(key, m_vPiRedisNodes);
+            if (reply.errorCode != REDIS_OK) {
+                return reply;
+            }
+        }
+
+        return sendCommandDirectly("hdel " + key + " " + field);
+    }
+
+    PiRedisReply hexists(const std::string& key, const std::string& field) {
+        if (m_bClusterMode) {
+            PiRedisReply reply = searchTargetClusterNode(key, m_vPiRedisNodes);
+            if (reply.errorCode != REDIS_OK) {
+                return reply;
+            }
+        }
+
+        return sendCommandDirectly("hexists " + key + " " + field);
+    }
+
+    PiRedisReply hgetall(const std::string& key) {
+        if (m_bClusterMode) {
+            PiRedisReply reply = searchTargetClusterNode(key, m_vPiRedisNodes);
+            if (reply.errorCode != REDIS_OK) {
+                return reply;
+            }
+        }
+
+        return sendCommandDirectly("hgetall " + key);
+    }
+
+    PiRedisReply hincrby(const std::string& key, const std::string& field, int64 increment) {
+        if (m_bClusterMode) {
+            PiRedisReply reply = searchTargetClusterNode(key, m_vPiRedisNodes);
+            if (reply.errorCode != REDIS_OK) {
+                return reply;
+            }
+        }
+
+        return sendCommandDirectly("hincrby " + key + " " + field + " " + std::to_string(increment));
+    }
+
+    // redis 暂时不支持解析 double 浮点型
+    PiRedisReply hincrbyfloat(const std::string& key, const std::string& field, float increment) {
+        if (m_bClusterMode) {
+            PiRedisReply reply = searchTargetClusterNode(key, m_vPiRedisNodes);
+            if (reply.errorCode != REDIS_OK) {
+                return reply;
+            }
+        }
+
+        return sendCommandDirectly("hincrbyfloat " + key + " " + field + " " + std::to_string(increment));
+    }
+
+    PiRedisReply hkeys(const std::string& key) {
+        if (m_bClusterMode) {
+            PiRedisReply reply = searchTargetClusterNode(key, m_vPiRedisNodes);
+            if (reply.errorCode != REDIS_OK) {
+                return reply;
+            }
+        }
+        
+        return sendCommandDirectly("hkeys " + key);
+    }
+
+    PiRedisReply hlen(const std::string& key) {
+        if (m_bClusterMode) {
+            PiRedisReply reply = searchTargetClusterNode(key, m_vPiRedisNodes);
+            if (reply.errorCode != REDIS_OK) {
+                return reply;
+            }
+        }
+        
+        return sendCommandDirectly("hlen " + key);
+    }
+
+    PiRedisReply hmget(const std::string& key, const std::vector<std::string>& vs) {
+        if (m_bClusterMode) {
+            PiRedisReply reply = searchTargetClusterNode(key, m_vPiRedisNodes);
+            if (reply.errorCode != REDIS_OK) {
+                return reply;
+            }
+        }
+        
+        std::string res = MyUtils::connacateStringVector(vs);
+        return sendCommandDirectly("hmget " + key + " " + res);
+    }
 
 
     // PiRedisReply mset(const std::map<std::string, std::string>& entries) {
