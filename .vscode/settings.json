@@ -40,6 +40,8 @@
         "streambuf": "cpp",
         "typeinfo": "cpp",
         "iomanip": "cpp",
-        "xstring": "cpp"
+        "xstring": "cpp",
+        "functional": "cpp",
+        "map": "cpp"
     }
 }

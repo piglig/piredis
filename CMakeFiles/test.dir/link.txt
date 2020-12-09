@@ -1,1 +1,1 @@
-/usr/bin/c++   -O0 -Wall -g -ggdb  -rdynamic CMakeFiles/test.dir/test.cpp.o  -o test   -L/usr/local/lib  -Wl,-rpath,/usr/local/lib -lhiredis 
+/usr/bin/c++   -g -Wall -O2 -g -DNDEBUG   CMakeFiles/test.dir/network/connection.cpp.o  -o test  -L/usr/local/lib -rdynamic 

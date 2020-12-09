@@ -1,4 +1,4 @@
-#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
 
 #IncludeRegexScan: ^.*$
 
@@ -6,77 +6,29 @@
 
 #IncludeRegexTransform: 
 
-/usr/local/include/hiredis/alloc.h
-stddef.h
--
+/usr/local/piredis/network/connection.cpp
+connection.h
+/usr/local/piredis/network/connection.h
 
-/usr/local/include/hiredis/hiredis.h
-read.h
-/usr/local/include/hiredis/read.h
-stdarg.h
+/usr/local/piredis/network/connection.h
+sys/socket.h
 -
-sys/time.h
+arpa/inet.h
 -
-stdint.h
+unistd.h
 -
-sds.h
-/usr/local/include/hiredis/sds.h
-alloc.h
-/usr/local/include/hiredis/alloc.h
-
-/usr/local/include/hiredis/read.h
-stdio.h
--
-
-/usr/local/include/hiredis/sds.h
-sys/types.h
--
-stdarg.h
--
-stdint.h
--
-
-/usr/local/piredis/node.h
-vector
--
-
-/usr/local/piredis/piredis.h
 iostream
 -
 string
 -
 vector
 -
+../utils/resp_utils.h
+/usr/local/piredis/utils/resp_utils.h
+
+/usr/local/piredis/utils/resp_utils.h
 map
 -
-hiredis.h
--
-utils/redis_utils.h
-/usr/local/piredis/utils/redis_utils.h
-node.h
-/usr/local/piredis/node.h
-
-/usr/local/piredis/test.cpp
-iostream
--
-algorithm
--
-cstdint
--
-piredis.h
-/usr/local/piredis/piredis.h
-
-/usr/local/piredis/utils/redis_utils.h
-vector
--
-utils.h
-/usr/local/piredis/utils/utils.h
-../node.h
-/usr/local/piredis/node.h
-
-/usr/local/piredis/utils/utils.h
-vector
--
-string
+functional
 -
 
