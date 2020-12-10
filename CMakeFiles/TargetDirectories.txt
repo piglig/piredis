@@ -1,3 +1,0 @@
-/usr/local/piredis/CMakeFiles/edit_cache.dir
-/usr/local/piredis/CMakeFiles/rebuild_cache.dir
-/usr/local/piredis/CMakeFiles/test.dir
