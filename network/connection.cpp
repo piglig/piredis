@@ -102,6 +102,20 @@ int main(void)
     // cout << reply.type << " " << reply.integerResp << endl;
 
     reply = connection.SendCommand("client list\r\n");
+    for (const auto &bulkStr : reply.bulkStrs)
+    {
+        size_t crlf = bulkStr.find("\r\n");
+        if (crlf != std::string::npos)
+        {
+            std::cout << "still have crlf" << std::endl;
+        }
+        else
+        {
+            std::cout << bulkStr;
+        }
+    }
+
+    cout << reply.bulkStrs.size() << endl;
     // cout << reply.type << " " << reply.integerResp << endl;
 
     return 0;

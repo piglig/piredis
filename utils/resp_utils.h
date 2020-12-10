@@ -162,9 +162,6 @@ RESPReply RESPUtils::ConvertToBulkStrings(const std::string& respBulkStrings) {
     reply.type = enumRESPBulkStrings;
     reply.bulkStrs = MyUtils::SplitString(respBulkStrings.substr(1), "\r\n");
 
-    // for (const auto& bulkStr : reply.bulkStrs) {
-    //     std::cout << bulkStr << std::endl;
-    // }
     return reply;
 }
 
