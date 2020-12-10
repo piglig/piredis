@@ -31,7 +31,7 @@ public:
 
     bool Close();
 
-    void SendCommand(const std::string& command);
+    RESPReply SendCommand(const std::string& command);
     RESPReply ReceiveResp();
 
 private:

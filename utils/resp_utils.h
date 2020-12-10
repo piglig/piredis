@@ -15,6 +15,7 @@ enum RESPType {
 enum EnumInnerError {
     enumArgumentInvalid = 1,
     enumRedisTypeInvalid = 2,
+    enumSocketSendMsgFailed = 3,
 };
 
 enum EnumOuterError {
@@ -53,10 +54,13 @@ struct RESPReply {
     void Reset() {
         type = enumRESPSimpleString;
         errorCode = 0;
+        str = "";
+        bulkStrs.clear();
+
     }
 };
 
-
+typedef std::map<RESPType, std::function<RESPReply(const std::string&)> > Convert;
 
 class RESPUtils {
 public:
@@ -75,24 +79,7 @@ public:
             return reply;
         }
         
-        
-        return converter[type](respString);
-    }
-
-    static RESPReply ConvertToSimpleString(const std::string& respSimpleString) {
-        RESPReply reply;
-        reply.errorCode = 0;
-        reply.type = enumRESPSimpleString;
-        reply.str = respSimpleString.substr(1, respSimpleString.size() - 2);
-        return reply;
-    }
-
-    static RESPReply ConvertToError(const std::string& respError) {
-        RESPReply reply;
-        reply.errorCode = 0;
-        reply.type = enumRESPErrors;
-        reply.str = respError.substr(1);
-        return reply;
+        return RESPUtils::converter[type](respString);
     }
 
     static bool IsValidRedisType(const char& type, RESPType& resType) {
@@ -118,26 +105,38 @@ public:
         return true;
     }
 
+    static RESPReply ConvertToError(const std::string& respError);
+
+    static RESPReply ConvertToSimpleString(const std::string& respSimpleString);
+
 private:
-    typedef std::map<RESPType, std::function<RESPReply(const std::string&)> > Convert;
-    static Convert CreateConverter();
+    
     static Convert  converter;
 };
 
-RESPUtils::Convert RESPUtils::CreateConverter() {
-    converter = {
-        {enumRESPSimpleString, &ConvertToSimpleString},
-    };
-
-    return converter;
+RESPReply RESPUtils::ConvertToError(const std::string& respError) {
+    RESPReply reply;
+    reply.errorCode = 0;
+    reply.type = enumRESPErrors;
+    reply.str = respError.substr(1);
+    return reply;
 }
 
-RESPUtils::Convert RESPUtils::converter = RESPUtils::CreateConverter();
+RESPReply RESPUtils::ConvertToSimpleString(const std::string& respSimpleString) {
+    RESPReply reply;
+    reply.errorCode = 0;
+    reply.type = enumRESPSimpleString;
+    size_t crlf = respSimpleString.find("\r\n");
+    if (crlf != std::string::npos) {
+        reply.str = respSimpleString.substr(1, crlf - 1);
+    }
+    
+    return reply;
+}
 
-
-// std::map<RESPType, std::function<RESPReply(const std::string&)> > RESPUtils::converter = {
-//     
-// }
-
+Convert RESPUtils::converter = {
+    {enumRESPSimpleString, &ConvertToSimpleString},
+    {enumRESPErrors, &ConvertToError},
+};
 
 #endif

@@ -39,13 +39,16 @@ bool RedisConnection::Close() {
     return false;
 }
 
-void RedisConnection::SendCommand(const std::string& command) {
+RESPReply RedisConnection::SendCommand(const std::string& command) {
+    RESPReply reply;
     if (send(sock, (char *)command.c_str(), command.size(), 0) < 0) {
+        reply.errorCode = -1;
+        reply.innerError = enumSocketSendMsgFailed;
         cout << "send failed[" << errno << "] " << endl;
-        return;
+        return reply;
     }
 
-    ReceiveResp();
+    return ReceiveResp();
 }
 
 RESPReply RedisConnection::ReceiveResp() {
@@ -67,8 +70,9 @@ int main(void)
         cout << "Connected to Redis success" << endl;
     }
 
-    connection.SendCommand("auth zshshy0192837465443\r\n");
-    connection.SendCommand("ping\r\n");
+    RESPReply reply = connection.SendCommand("auth zshshy0192837465443\r\n");
+    cout << reply.type << " " << reply.str << endl;
+    // connection.SendCommand("ping\r\n");
 
     return 0;
 }
