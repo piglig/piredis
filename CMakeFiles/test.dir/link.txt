@@ -1,1 +1,0 @@
-/usr/bin/c++   -g -Wall -O2 -g -DNDEBUG   CMakeFiles/test.dir/network/connection.cpp.o  -o test  -L/usr/local/lib -rdynamic 
