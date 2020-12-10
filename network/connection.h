@@ -10,6 +10,8 @@
 
 #include "../utils/resp_utils.h"
 
+#define BUFFER_SIZE 1024
+
 using std::cout;
 using std::endl;
 using std::string;

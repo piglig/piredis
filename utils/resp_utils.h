@@ -82,7 +82,6 @@ public:
             reply.innerError = enumRedisTypeInvalid;
             return reply;
         }
-        
         return RESPUtils::converter[type](respString);
     }
 
@@ -161,11 +160,12 @@ RESPReply RESPUtils::ConvertToBulkStrings(const std::string& respBulkStrings) {
     RESPReply reply;
     reply.errorCode = 0;
     reply.type = enumRESPBulkStrings;
-    reply.bulkStrs = MyUtils::SplitString(respBulkStrings, "\r\n");
+    reply.bulkStrs = MyUtils::SplitString(respBulkStrings.substr(1), "\r\n");
 
-    std::for_each(reply.bulkStrs.begin(), reply.bulkStrs.end(), [&](const auto& str) {
-        std::cout << str << std::endl;
-    });
+    // for (const auto& bulkStr : reply.bulkStrs) {
+    //     std::cout << bulkStr << std::endl;
+    // }
+    return reply;
 }
 
 Convert RESPUtils::converter = {

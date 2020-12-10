@@ -52,11 +52,28 @@ RESPReply RedisConnection::SendCommand(const std::string& command) {
 }
 
 RESPReply RedisConnection::ReceiveResp() {
-    RESPReply res;
-    string reply(1024, 0);
-    if (read(sock, &reply[0], 1024 - 1) < 0) {
-        cout << "failed read data from socket" << endl;
-        return res;
+    string reply(BUFFER_SIZE, 0);
+    int start = 0;
+    while (1) {
+        int readBytes = read(sock, &reply[start], BUFFER_SIZE - 1);
+        cout << "read bytes:" << readBytes << endl;
+        cout << "reply:" << reply << endl;
+        if (readBytes < 0) {
+            cout << "failed read data from socket" << endl;
+            break;
+        } else if (readBytes == 0) {
+            cout << "read done data from socket" << endl;
+            break;
+        } else {
+            if (readBytes >= BUFFER_SIZE - 1) {
+                string temp = reply;
+                reply.resize(temp.size() * 2);
+                reply = temp;
+            } else {
+                start += readBytes;
+                break;
+            }
+        }
     }
     
     return RESPUtils::ConvertToRESPReply(reply);
@@ -71,15 +88,16 @@ int main(void)
     }
 
     RESPReply reply = connection.SendCommand("auth zshshy0192837465443\r\n");
-    cout << reply.type << " " << reply.str << endl;
+    // cout << reply.type << " " << reply.str << endl;
     reply = connection.SendCommand("ping\r\n");
-    cout << reply.type << " " << reply.str << endl;
+    
+    // cout << reply.type << " " << reply.str << endl;
 
     reply = connection.SendCommand("ping1\r\n");
-    cout << reply.type << " " << reply.str << endl;
+    // cout << reply.type << " " << reply.str << endl;
 
     reply = connection.SendCommand("DBSIZE\r\n");
-    cout << reply.type << " " << reply.integerResp << endl;
+    // cout << reply.type << " " << reply.integerResp << endl;
 
     reply = connection.SendCommand("client list\r\n");
     // cout << reply.type << " " << reply.integerResp << endl;
