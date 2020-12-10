@@ -60,23 +60,23 @@ struct RESPReply {
 
 class RESPUtils {
 public:
-    static RESPReply ConvertToRESPReply(const std::string& respSimpleString) {
+    static RESPReply ConvertToRESPReply(const std::string& respString) {
         RESPReply reply;
-        if (respSimpleString.size() == 0) {
+        if (respString.size() == 0) {
             reply.errorCode = -1;
             reply.innerError = enumArgumentInvalid;
             return reply;
         }
 
         RESPType type;
-        if (!IsValidRedisType(respSimpleString[0], type)) {
+        if (!IsValidRedisType(respString[0], type)) {
             reply.errorCode = -1;
             reply.innerError = enumRedisTypeInvalid;
             return reply;
         }
         
         
-        return converter[type](respSimpleString);
+        return converter[type](respString);
     }
 
     static RESPReply ConvertToSimpleString(const std::string& respSimpleString) {
