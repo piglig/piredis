@@ -44,53 +44,53 @@ public:
         return (wCRCin);
     }
 
-    static unsigned short GetSlotValue(const std::string& key) {
-        std::string res;
-        int begin = 0;
-        int end = 0;
-        for (begin = 0; begin < key.length(); ++begin) {
-            if (key[begin] == '{') {
-                break;
-            }
-        }
+    // static unsigned short GetSlotValue(const std::string& key) {
+    //     std::string res;
+    //     int begin = 0;
+    //     int end = 0;
+    //     for (begin = 0; begin < key.length(); ++begin) {
+    //         if (key[begin] == '{') {
+    //             break;
+    //         }
+    //     }
 
-        if (begin == key.length()) {
-            res = key;
-            return CRC16_XMODEM(&res[0], res.length()) % 16384;
-        }
+    //     if (begin == key.length()) {
+    //         res = key;
+    //         return CRC16_XMODEM(&res[0], res.length()) % 16384;
+    //     }
 
-        for (end = begin + 1; end < key.length(); ++end) {
-            if (key[end] == '}') {
-                break;
-            }
-        }
+    //     for (end = begin + 1; end < key.length(); ++end) {
+    //         if (key[end] == '}') {
+    //             break;
+    //         }
+    //     }
 
-        if (end == begin + 1 || end == key.length()) {
-            res = key;
-            return CRC16_XMODEM(&res[0], key.length()) % 16384;
-        }
-        return CRC16_XMODEM(&(key.substr(begin + 1, end - begin - 1))[0], end - begin - 1) % 16384;
-    }
+    //     if (end == begin + 1 || end == key.length()) {
+    //         res = key;
+    //         return CRC16_XMODEM(&res[0], key.length()) % 16384;
+    //     }
+    //     return CRC16_XMODEM(&(key.substr(begin + 1, end - begin - 1))[0], end - begin - 1) % 16384;
+    // }
 
-    static std::string connacateStringVector(const std::vector<std::string>& vs) {
-        std::string res = "";
+    // static std::string connacateStringVector(const std::vector<std::string>& vs) {
+    //     std::string res = "";
 
-        for_each(vs.begin(), vs.end(), [&](const auto& str) {
-            res += str + " ";
-        });
+    //     for_each(vs.begin(), vs.end(), [&](const auto& str) {
+    //         res += str + " ";
+    //     });
 
-        return res;
-    }
+    //     return res;
+    // }
 
-    static std::string connacateStringPairHashMap(const std::map<std::string, std::string>& pairs) {
-        std::string res = "";
+    // static std::string connacateStringPairHashMap(const std::map<std::string, std::string>& pairs) {
+    //     std::string res = "";
 
-        for (const auto& pair : pairs) {
-            res += pair.first + " " + pair.second + " ";
-        }
+    //     for (const auto& pair : pairs) {
+    //         res += pair.first + " " + pair.second + " ";
+    //     }
 
-        return res;
-    }
+    //     return res;
+    // }
 };
 
 #endif

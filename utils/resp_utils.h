@@ -3,6 +3,10 @@
 
 #include <map>
 #include <functional>
+#include <algorithm>
+#include "utils.h"
+
+#define int64 int64_t
 
 enum RESPType {
     enumRESPSimpleString = 0,           // simple string "+"
@@ -25,12 +29,12 @@ enum EnumOuterError {
 struct RESPReply {
     std::string str;
     std::vector<std::string> bulkStrs;
+    int64 integerResp;
 
     // 返回类型
     RESPType type;
 
     EnumInnerError innerError;
-    EnumOuterError outerError;
     // -1 innerError -2 outerError
     int errorCode;
 
@@ -43,7 +47,6 @@ struct RESPReply {
         bulkStrs = another.bulkStrs;
         type = another.type;
         innerError = another.innerError;
-        outerError = another.outerError;
         errorCode = another.errorCode;
     }
 
@@ -55,6 +58,7 @@ struct RESPReply {
         type = enumRESPSimpleString;
         errorCode = 0;
         str = "";
+        integerResp = 0;
         bulkStrs.clear();
 
     }
@@ -109,6 +113,10 @@ public:
 
     static RESPReply ConvertToSimpleString(const std::string& respSimpleString);
 
+    static RESPReply ConvertToInteger(const std::string& respInteger);
+
+    static RESPReply ConvertToBulkStrings(const std::string& respBulkStrings);
+
 private:
     
     static Convert  converter;
@@ -118,7 +126,10 @@ RESPReply RESPUtils::ConvertToError(const std::string& respError) {
     RESPReply reply;
     reply.errorCode = 0;
     reply.type = enumRESPErrors;
-    reply.str = respError.substr(1);
+    size_t crlf = respError.find("\r\n");
+    if (crlf != std::string::npos) {
+        reply.str = respError.substr(1, crlf - 1);
+    }
     return reply;
 }
 
@@ -134,9 +145,34 @@ RESPReply RESPUtils::ConvertToSimpleString(const std::string& respSimpleString) 
     return reply;
 }
 
+RESPReply RESPUtils::ConvertToInteger(const std::string& respInteger) {
+    RESPReply reply;
+    reply.errorCode = 0;
+    reply.type = enumRESPSimpleString;
+    size_t crlf = respInteger.find("\r\n");
+    if (crlf != std::string::npos) {
+        reply.integerResp = stol(respInteger.substr(1, crlf - 1));
+    }
+    
+    return reply;
+}
+
+RESPReply RESPUtils::ConvertToBulkStrings(const std::string& respBulkStrings) {
+    RESPReply reply;
+    reply.errorCode = 0;
+    reply.type = enumRESPBulkStrings;
+    reply.bulkStrs = MyUtils::SplitString(respBulkStrings, "\r\n");
+
+    std::for_each(reply.bulkStrs.begin(), reply.bulkStrs.end(), [&](const auto& str) {
+        std::cout << str << std::endl;
+    });
+}
+
 Convert RESPUtils::converter = {
     {enumRESPSimpleString, &ConvertToSimpleString},
     {enumRESPErrors, &ConvertToError},
+    {enumRESPIntegers, &ConvertToInteger},
+    {enumRESPBulkStrings, &ConvertToBulkStrings},
 };
 
 #endif

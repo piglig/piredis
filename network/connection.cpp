@@ -72,7 +72,17 @@ int main(void)
 
     RESPReply reply = connection.SendCommand("auth zshshy0192837465443\r\n");
     cout << reply.type << " " << reply.str << endl;
-    // connection.SendCommand("ping\r\n");
+    reply = connection.SendCommand("ping\r\n");
+    cout << reply.type << " " << reply.str << endl;
+
+    reply = connection.SendCommand("ping1\r\n");
+    cout << reply.type << " " << reply.str << endl;
+
+    reply = connection.SendCommand("DBSIZE\r\n");
+    cout << reply.type << " " << reply.integerResp << endl;
+
+    reply = connection.SendCommand("client list\r\n");
+    // cout << reply.type << " " << reply.integerResp << endl;
 
     return 0;
 }
