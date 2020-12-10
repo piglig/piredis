@@ -82,14 +82,16 @@ RESPReply RedisConnection::ReceiveResp() {
 
 int main(void) 
 {
-    RedisConnection connection("10.10.243.233");
+    RedisConnection connection("101.37.20.126");
     if (connection.Connect()) {
         cout << "Connected to Redis success" << endl;
     }
 
-    RESPReply reply = connection.SendCommand("auth zshshy0192837465443\r\n");
-    // cout << reply.type << " " << reply.str << endl;
-    reply = connection.SendCommand("ping\r\n");
+    // RESPReply reply = connection.SendCommand("auth zshshy0192837465443\r\n");
+
+    RESPReply reply = connection.SendCommand("ping\r\n");
+    cout << reply.type << " " << reply.str << endl;
+    
     
     // cout << reply.type << " " << reply.str << endl;
 
