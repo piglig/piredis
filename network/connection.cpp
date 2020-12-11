@@ -56,8 +56,8 @@ RESPReply RedisConnection::ReceiveResp() {
     int start = 0;
     while (1) {
         int readBytes = read(sock, &reply[start], BUFFER_SIZE - 1);
-        cout << "read bytes:" << readBytes << endl;
-        cout << "reply:" << reply << endl;
+        // cout << "read bytes:" << readBytes << endl;
+        // cout << "reply:" << reply << endl;
         if (readBytes < 0) {
             cout << "failed read data from socket" << endl;
             break;
@@ -90,7 +90,7 @@ int main(void)
     // RESPReply reply = connection.SendCommand("auth zshshy0192837465443\r\n");
 
     RESPReply reply = connection.SendCommand("ping\r\n");
-    cout << reply.type << " " << reply.str << endl;
+    // cout << reply.type << " " << reply.str << endl;
     
     
     // cout << reply.type << " " << reply.str << endl;
@@ -102,20 +102,23 @@ int main(void)
     // cout << reply.type << " " << reply.integerResp << endl;
 
     reply = connection.SendCommand("client list\r\n");
-    for (const auto &bulkStr : reply.bulkStrs)
-    {
-        size_t crlf = bulkStr.find("\r\n");
+    for (int i = 0; i < reply.bulkStrs.size(); ++i) {
+        size_t crlf = reply.bulkStrs[i].find("\r\n");
         if (crlf != std::string::npos)
         {
             std::cout << "still have crlf" << std::endl;
         }
         else
         {
-            std::cout << bulkStr;
+            if (reply.bulkStrs[i] == "\r\n") {
+                std::cout << "have return new line" << std::endl;
+            }
+            std::cout << "i: " << i + 1 << " " << reply.bulkStrs[i] << std::endl;
+            std::cout << "the " << i + 1 << " line last character: " << reply.bulkStrs[i][reply.bulkStrs[i].size()-1] << std::endl;
         }
     }
 
-    cout << reply.bulkStrs.size() << endl;
+    // cout << reply.bulkStrs.size() << endl;
     // cout << reply.type << " " << reply.integerResp << endl;
 
     return 0;
