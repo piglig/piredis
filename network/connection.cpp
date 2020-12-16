@@ -6,8 +6,22 @@ bool RedisConnection::Connect() {
         return false;
     }
 
+    struct timeval timeout;
+    timeout.tv_sec = 5;
+    timeout.tv_usec = 0;
+
+    if (setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (char*)&timeout, sizeof(timeout)) < 0) {
+        cout << "recv timed out" << endl;
+    }
+
+    if (setsockopt(sock, SOL_SOCKET, SO_SNDTIMEO, (char*)&timeout, sizeof(timeout)) < 0) {
+        cout << "send timed out" << endl;
+    }
+
     if (connect(sock, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0) {
         cout << "connect failed" << endl;
+        // when connect failed, socket file descriptor is invalid, should close it
+        Close(); 
         return false;
     }
     return true;
@@ -83,6 +97,9 @@ RESPReply RedisConnection::ReceiveResp() {
 int main(void) 
 {
     RedisConnection connection("101.37.20.126");
+    
+    // RedisConnection connection("180.101.49.12");
+    // RedisConnection connection("127.0.0.1");
     if (connection.Connect()) {
         cout << "Connected to Redis success" << endl;
     }
@@ -102,7 +119,8 @@ int main(void)
     // cout << reply.type << " " << reply.integerResp << endl;
 
     reply = connection.SendCommand("client list\r\n");
-    for (int i = 0; i < reply.bulkStrs.size(); ++i) {
+
+    for (auto i = 0; i < reply.bulkStrs.size(); ++i) {
         size_t crlf = reply.bulkStrs[i].find("\r\n");
         if (crlf != std::string::npos)
         {
@@ -113,10 +131,19 @@ int main(void)
             if (reply.bulkStrs[i] == "\r\n") {
                 std::cout << "have return new line" << std::endl;
             }
-            std::cout << "i: " << i + 1 << " " << reply.bulkStrs[i] << std::endl;
-            std::cout << "the " << i + 1 << " line last character: " << reply.bulkStrs[i][reply.bulkStrs[i].size()-1] << std::endl;
+            std::cout << reply.bulkStrs[i] << std::endl;
+            // std::cout << "the " << i + 1 << " line last character: " << reply.bulkStrs[i][reply.bulkStrs[i].size()-1] << std::endl;
         }
     }
+
+
+        reply = connection.SendCommand("lrange test_list 0 -1\r\n");
+
+        for (const auto& str : reply.arrays) {
+            cout << str << endl;
+        }
+
+        cout << "size: " << reply.arrays.size() << endl;
 
     // cout << reply.bulkStrs.size() << endl;
     // cout << reply.type << " " << reply.integerResp << endl;

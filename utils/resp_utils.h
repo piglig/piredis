@@ -20,15 +20,18 @@ enum EnumInnerError {
     enumArgumentInvalid = 1,
     enumRedisTypeInvalid = 2,
     enumSocketSendMsgFailed = 3,
+    enumBulkStringNull = 4,
 };
 
 enum EnumOuterError {
 
 };
 
+
 struct RESPReply {
     std::string str;
     std::vector<std::string> bulkStrs;
+    std::vector<std::string> arrays;
     int64 integerResp;
 
     // 返回类型
@@ -116,6 +119,8 @@ public:
 
     static RESPReply ConvertToBulkStrings(const std::string& respBulkStrings);
 
+    static RESPReply ConvertToArray(const std::string& respArrayString);
+
 private:
     
     static Convert  converter;
@@ -161,7 +166,56 @@ RESPReply RESPUtils::ConvertToBulkStrings(const std::string& respBulkStrings) {
     reply.errorCode = 0;
     reply.type = enumRESPBulkStrings;
     reply.bulkStrs = MyUtils::SplitString(respBulkStrings.substr(1), "\r\n");
+    // number bytes
+    int numBytes = stoi(reply.bulkStrs[0]);
+    if (numBytes < 0) {
+        reply.errorCode = -1;
+        reply.innerError = enumBulkStringNull;
+    } else if (numBytes == 0) {
+        reply.errorCode = 0;
+        reply.bulkStrs.clear();
+    } else {
+        // info
+        std::vector<std::string> res = MyUtils::SplitString(reply.bulkStrs[1], " ");
 
+        int lastElement = reply.bulkStrs.size() - 1;
+        // TODO: piglig 暂时不知道最后一行到底是什么, 返回好像是空字符一类的
+        reply.bulkStrs.erase(reply.bulkStrs.begin() + lastElement);
+    }
+
+    return reply;
+}
+
+RESPReply RESPUtils::ConvertToArray(const std::string& respArrayString) {
+    RESPReply reply;
+    reply.errorCode = 0;
+    reply.type = enumRESPBulkStrings;
+    size_t crlf = respArrayString.find("\r\n");
+    int elementsSize = 0;
+    if (crlf != std::string::npos) {
+        elementsSize = stoi(respArrayString.substr(1, crlf - 1));
+        if (elementsSize > 0) {
+            reply.arrays = MyUtils::SplitString(respArrayString.substr(crlf + 2), "\r\n");
+        }
+    }
+
+    
+    int lastElement = reply.arrays.size() - 1;
+    // TODO: piglig 暂时不知道最后一行到底是什么, 返回好像是空字符一类的
+    reply.arrays.erase(reply.arrays.begin() + lastElement);
+    std::cout << "size: "  << elementsSize << std::endl;
+
+    for (const auto& element : reply.arrays) {
+        std::cout << element << std::endl;
+    }
+
+    std::vector<std::string> temp;
+    for (size_t i = 0; i < reply.arrays.size(); ++i) {
+        if ((i + 1) % 2 == 0) {
+            temp.push_back(reply.arrays[i]);
+        }
+    }
+    reply.arrays = temp;
     return reply;
 }
 
@@ -170,6 +224,7 @@ Convert RESPUtils::converter = {
     {enumRESPErrors, &ConvertToError},
     {enumRESPIntegers, &ConvertToInteger},
     {enumRESPBulkStrings, &ConvertToBulkStrings},
+    {enumRESPArrays, &ConvertToArray},
 };
 
 #endif
